@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalhes da Venda</title>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
+    <style>
+        body { font-family: sans-serif; background-color: #121212; color: white; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .card { background: #1e1e1e; padding: 25px; border-radius: 15px; width: 90%; max-width: 350px; text-align: center; border: 1px solid #333; }
+        .loja { color: #bbb; font-size: 14px; margin-bottom: 5px; }
+        h1 { font-size: 24px; margin: 10px 0; }
+        .preco { color: #2ecc71; font-size: 30px; font-weight: bold; margin: 15px 0; }
+        .desc { color: #aaa; font-size: 16px; margin-bottom: 20px; }
+        .btn { background-color: #25d366; color: white; text-decoration: none; padding: 15px; border-radius: 10px; display: block; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="card" id="conteudo" style="display:none;">
+        <div class="loja" id="exibirLoja"></div>
+        <h1 id="exibirProduto"></h1>
+        <div class="preco" id="exibirPreco"></div>
+        <p class="desc" id="exibirDescricao"></p>
+        <a href="#" id="linkWhats" class="btn">Comprar pelo WhatsApp</a>
+    </div>
+
+    <script>
+        const firebaseConfig = { databaseURL: "https://dalesteflix-default-rtdb.firebaseio.com" };
+        firebase.initializeApp(firebaseConfig);
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const idVenda = urlParams.get('id');
+
+        if (idVenda) {
+            firebase.database().ref('vendas/' + idVenda).on('value', (s) => {
+                const d = s.val();
+                if (d) {
+                    document.getElementById('exibirLoja').innerText = d.nomeLoja || "";
+                    document.getElementById('exibirProduto').innerText = d.nomeProduto || "";
+                    document.getElementById('exibirPreco').innerText = "R$ " + (d.preco || "0,00");
+                    document.getElementById('exibirDescricao').innerText = d.descricao || "";
+                    
+                    let n = String(d.whatsapp || "").replace(/\D/g, '');
+                    if (n && !n.startsWith('55')) n = '55' + n;
+                    document.getElementById('linkWhats').href = "https://wa.me/" + n;
+                    document.getElementById('conteudo').style.display = 'block';
+                }
+            });
+        }
+    </script>
+</body>
+</html>
+

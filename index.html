@@ -7,47 +7,56 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <style>
-        body { background-color: #121212; color: white; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .card { background-color: #1e1e1e; padding: 30px; border-radius: 15px; text-align: center; width: 90%; max-width: 350px; }
-        .loja { color: #aaaaaa; font-size: 14px; margin-bottom: 5px; }
-        .produto { font-size: 24px; font-weight: bold; margin-bottom: 15px; }
-        .preco { color: #2ecc71; font-size: 32px; font-weight: bold; margin-bottom: 20px; }
-        .btn { background-color: #008000; color: white; text-decoration: none; padding: 15px; border-radius: 10px; display: block; font-weight: bold; }
+        body { background-color: #121212; color: white; font-family: sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .cartao { background-color: #1e1e1e; padding: 30px; border-radius: 15px; text-align: center; width: 90%; max-width: 400px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        .loja { color: #aaaaaa; font-size: 16px; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px; }
+        .produto { font-size: 28px; font-weight: bold; margin-bottom: 10px; }
+        .preco { color: #2ecc71; font-size: 32px; font-weight: bold; margin-bottom: 15px; }
+        .descricao { color: #bbbbbb; font-size: 16px; margin-bottom: 25px; line-height: 1.4; word-wrap: break-word; }
+        .botao { display: block; background-color: #008000; color: white; text-decoration: none; padding: 15px; border-radius: 10px; font-weight: bold; font-size: 18px; transition: background 0.3s; }
+        .botao:hover { background-color: #006400; }
     </style>
 </head>
 <body>
 
-<div class="card" id="conteudo">
+<div id="conteudo" class="cartao">
     <p>Carregando...</p>
 </div>
 
 <script>
-    // Use a sua URL do Firebase que está no strings.xml
+    // Configuração do seu Firebase
     const firebaseConfig = {
         databaseURL: "https://dalesteflix-default-rtdb.firebaseio.com/"
     };
+    
     firebase.initializeApp(firebaseConfig);
 
+    // Captura os parâmetros da URL
     const urlParams = new URLSearchParams(window.location.search);
     const idVenda = urlParams.get('id');
 
     if (idVenda) {
         firebase.database().ref('vendas/' + idVenda).once('value').then((snapshot) => {
-            const data = snapshot.val();
-            if (data) {
-                // CORREÇÃO: Usando 'precoProduto' para bater com o Java
+            const dados = snapshot.val();
+            if (dados) {
+                // Monta a estrutura da tela trazendo a descrição e o WhatsApp corretos
                 document.getElementById('conteudo').innerHTML = `
-                    <div class="loja">${data.nomeLoja}</div>
-                    <div class="produto">${data.nomeProduto}</div>
-                    <div class="preco">R$ ${data.precoProduto}</div>
-                    <a href="https://wa.me/${data.whatsVendas}" class="btn">Comprar pelo WhatsApp</a>
+                    <div class="loja">${dados.loja || dados.nomeLoja || 'Loja'}</div>
+                    <div class="produto">${dados.produto || dados.nomeProduto}</div>
+                    <div class="preco">R$ ${dados.preco || dados.precoProduto}</div>
+                    <div class="descricao">${dados.descricao || dados.descricaoProduto || 'Sem descrição cadastrada.'}</div>
+                    <a href="https://wa.me/${dados.whats || dados.whatsInput}" class="botao">Comprar pelo WhatsApp</a>
                 `;
             } else {
-                document.getElementById('conteudo').innerHTML = "Venda não encontrada.";
+                document.getElementById('conteudo').innerHTML = "<h3>Venda não encontrada ou expirada.</h3>";
             }
+        }).catch((error) => {
+            document.getElementById('conteudo').innerHTML = "<h3>Erro ao carregar dados.</h3>";
+            console.error(error);
         });
+    } else {
+        document.getElementById('conteudo').innerHTML = "<h3>ID de venda inválido.</h3>";
     }
 </script>
-
 </body>
 </html>

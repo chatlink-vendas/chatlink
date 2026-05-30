@@ -39,13 +39,24 @@
         firebase.database().ref('vendas/' + idVenda).once('value').then((snapshot) => {
             const dados = snapshot.val();
             if (dados) {
-                // Monta a estrutura da tela trazendo a descrição e o WhatsApp corretos
+                // Pega o número do WhatsApp vindo do Firebase
+                let numeroWhats = dados.whats || dados.whatsInput || '';
+                
+                // Remove tudo o que NÃO for número (tirando espaços, traços, parênteses e links antigos)
+                numeroWhats = numeroWhats.replace(/\D/g, '');
+
+                // Se o usuário esqueceu de colocar o 55 do Brasil, nós adicionamos automaticamente
+                if (numeroWhats.length === 11 || numeroWhats.length === 10) {
+                    numeroWhats = '55' + numeroWhats;
+                }
+
+                // Monta a estrutura da tela trazendo a descrição e o WhatsApp limpo
                 document.getElementById('conteudo').innerHTML = `
                     <div class="loja">${dados.loja || dados.nomeLoja || 'Loja'}</div>
                     <div class="produto">${dados.produto || dados.nomeProduto}</div>
                     <div class="preco">R$ ${dados.preco || dados.precoProduto}</div>
                     <div class="descricao">${dados.descricao || dados.descricaoProduto || 'Sem descrição cadastrada.'}</div>
-                    <a href="https://wa.me/${dados.whats || dados.whatsInput}" class="botao">Comprar pelo WhatsApp</a>
+                    <a href="https://wa.me/${numeroWhats}" class="botao">Comprar pelo WhatsApp</a>
                 `;
             } else {
                 document.getElementById('conteudo').innerHTML = "<h3>Venda não encontrada ou expirada.</h3>";

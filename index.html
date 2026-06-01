@@ -39,23 +39,23 @@
         firebase.database().ref('vendas/' + idVenda).once('value').then((snapshot) => {
             const dados = snapshot.val();
             if (dados) {
-                // Pega o número do WhatsApp vindo do Firebase
-                let numeroWhats = dados.whats || dados.whatsInput || '';
+                // Pega o número do WhatsApp vindo do Firebase (aceitando a letra 'x' do ProGuard)
+                let numeroWhats = dados.x || dados.whats || dados.whatsInput || '';
                 
-                // Remove tudo o que NÃO for número (tirando espaços, traços, parênteses e links antigos)
+                // Remove tudo o que NÃO for número
                 numeroWhats = numeroWhats.replace(/\D/g, '');
 
-                // Se o usuário esqueceu de colocar o 55 do Brasil, nós adicionamos automaticamente
+                // Se o usuário esqueceu de colocar o 55 do Brasil, adiciona automaticamente
                 if (numeroWhats.length === 11 || numeroWhats.length === 10) {
                     numeroWhats = '55' + numeroWhats;
                 }
 
-                // Monta a estrutura da tela trazendo a descrição e o WhatsApp limpo
+                // Monta a estrutura da tela aceitando as letras t, u, v, w do ProGuard e mantendo compatibilidade com os antigos
                 document.getElementById('conteudo').innerHTML = `
-                    <div class="loja">${dados.loja || dados.nomeLoja || 'Loja'}</div>
-                    <div class="produto">${dados.produto || dados.nomeProduto}</div>
-                    <div class="preco">R$ ${dados.preco || dados.precoProduto}</div>
-                    <div class="descricao">${dados.descricao || dados.descricaoProduto || 'Sem descrição cadastrada.'}</div>
+                    <div class="loja">${dados.t || dados.loja || dados.nomeLoja || 'Loja'}</div>
+                    <div class="produto">${dados.u || dados.produto || dados.nomeProduto || 'Produto'}</div>
+                    <div class="preco">R$ ${dados.v || dados.preco || dados.precoProduto || '0,00'}</div>
+                    <div class="descricao">${dados.w || dados.descricao || dados.descricaoProduto || 'Sem descrição cadastrada.'}</div>
                     <a href="https://wa.me/${numeroWhats}" class="botao">Comprar pelo WhatsApp</a>
                 `;
             } else {
